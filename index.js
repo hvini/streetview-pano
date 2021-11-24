@@ -1,3 +1,4 @@
+const SpaceNavigator = require('./lib/spacenav');
 const express = require('express');
 const app = express();
 const cors = require('cors');
@@ -18,6 +19,11 @@ require('dotenv').config();
 app.use(express.static(__dirname + '/public'));
 
 io.on('connection', function (socket) {
+    if (SpaceNavigator.deviceCount() > 0) {
+        const spacenav = new SpaceNavigator.SpaceNavigator();
+        io.emit('spacenav', spacenav);
+    }
+
     socket.on('search_result', function (panodata) {
         io.emit('search_result', panodata);
     });

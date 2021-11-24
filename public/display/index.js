@@ -22,6 +22,16 @@ let masterPov = {
     zoom: zoom
 };
 
+socket.on('spacenav', function (spacenav) {
+    spacenav.on('translate', function (translation) {
+        console.log(translation);
+    });
+
+    spacenav.on('rotate', function (rotation) {
+        console.log(rotation);
+    })
+});
+
 /* update master pov value */
 socket.on('update', function (pov) {
     masterPov = pov;
@@ -45,23 +55,25 @@ function initialize() {
     const pos = { lat: 42.345573, lng: -71.098326 };
 
     const svOptions = {
+        position: pos,
         visible: true,
         disableDefaultUI: true,
-        scrollwheel: false
+        scrollwheel: false,
+        pov: {
+            heading: masterPov.heading + yawshift,
+            pitch: masterPov.pitch,
+            zoom: masterPov.zoom
+        }
+    }
+
+    if(master) {
+        svOptions.linksControl = true;
     }
 
     /* initialize street view panorama */
     streetview = new google.maps.StreetViewPanorama(
         document.getElementById('pano'),
-        {
-            position: pos,
-            svOptions,
-            pov: {
-                heading: masterPov.heading + yawshift,
-                pitch: masterPov.pitch,
-                zoom: masterPov.zoom
-            }
-        }
+        svOptions
     );
 
     /* master listener events */
