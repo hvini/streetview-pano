@@ -22,14 +22,16 @@ let masterPov = {
     zoom: zoom
 };
 
-socket.on('spacenav', function (spacenav) {
-    spacenav.on('translate', function (translation) {
-        console.log(translation);
-    });
+socket.on('translation', function (translation) {
+    if (master) {
+        const pov = streetview.getPov();
+        pov.heading += 0.05;
+        streetview.setPov(pov);
+    }
+});
 
-    spacenav.on('rotate', function (rotation) {
-        console.log(rotation);
-    })
+socket.on('rotation', function (rotation) {
+    // moveForward();
 });
 
 /* update master pov value */

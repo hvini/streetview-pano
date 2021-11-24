@@ -21,7 +21,14 @@ app.use(express.static(__dirname + '/public'));
 io.on('connection', function (socket) {
     if (SpaceNavigator.deviceCount() > 0) {
         const spacenav = new SpaceNavigator.SpaceNavigator();
-        io.emit('spacenav', spacenav);
+        
+        spacenav.on('translate', function (translation) {
+            io.emit('translation', translation);
+        });
+
+        spacenav.on('rotate', function (rotation) {
+            io.emit('rotation', rotation);
+        });
     }
 
     socket.on('search_result', function (panodata) {
