@@ -22,12 +22,12 @@ io.on('connection', function (socket) {
     if (SpaceNavigator.deviceCount() > 0) {
         const spacenav = new SpaceNavigator.SpaceNavigator();
         
-        spacenav.on('translate', function (translation) {
-            io.emit('translation', translation);
+        spacenav.on('transform', function (transform) {
+            io.emit('transform', transform);
         });
 
-        spacenav.on('rotate', function (rotation) {
-            io.emit('rotation', rotation);
+        spacenav.on('button', function (event) {
+            io.emit('button', event);
         });
     }
 

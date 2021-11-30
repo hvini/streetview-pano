@@ -8,7 +8,7 @@ let width = window.innerWidth;
 let height = window.innerHeight;
 const screenratio = width / height;
 
-const zoom = 1;
+const zoom = 10;
 
 const hfov = 180 / Math.pow(2, zoom);
 const vfov = hfov * screenratio;
@@ -22,16 +22,24 @@ let masterPov = {
     zoom: zoom
 };
 
-socket.on('translation', function (translation) {
+socket.on('transform', function (transform) {
     if (master) {
         const pov = streetview.getPov();
-        pov.heading += 0.05;
-        streetview.setPov(pov);
+        if(Math.abs(transform) > 8) {
+            pov.heading += transform * 0.0032;
+            streetview.setPov(pov);
+        }
     }
 });
 
-socket.on('rotation', function (rotation) {
-    // moveForward();
+socket.on('button', function (event) {
+    if (event > 0) {
+        if (event == 1) {
+            moveBackward();
+        } else if (event == 2) {
+            moveForward();
+        }
+    }
 });
 
 /* update master pov value */
@@ -43,7 +51,7 @@ socket.on('update', function (pov) {
 /* update master pano value */
 socket.on('pano_changed', function (panoid) {
     masterPano = panoid;
-    moveForward();
+    streetview.setPano(panoid);
 });
 
 /* fly to */
@@ -105,14 +113,75 @@ function update () {
             pitch: masterPov.pitch,
             zoom: masterPov.zoom
         });
-    } else {
-        socket.emit('update', streetview.getPov());
     }
 }
 
-/* update pano on move forward */
+// move to the pano nearest the current heading
 function moveForward () {
-    if (!master) {
-        streetview.setPano(masterPano);
+    const forward = _getForwardLink();
+    if (forward) {
+        socket.emit('pano_changed', forward.pano);
+    } else {
+        console.log('cant move forward, no links!');
     }
+}
+
+// move to the pano farthest the current heading
+function moveBackward () {
+    const backward = _getBackwardLink();
+    if (backward) {
+        socket.emit('pano_changed', backward.pano);
+    } else {
+        console.log('cant move forward, no links!');
+    }
+}
+
+// return the difference between the current heading and the provided link
+function _getLinkDifference (pov, link) {
+    const pov_heading = pov.heading;
+    const link_heading = link.heading;
+
+    const diff = Math.abs(link_heading - pov_heading) % 360;
+
+    return diff >= 180 ? diff - (diff - 180) * 2 : diff;
+}
+
+// return the link nearest the current heading
+function _getForwardLink () {
+    const pov = streetview.getPov();
+    const links = streetview.getLinks();
+    const len = links.length;
+    let nearest = null;
+    let nearest_difference = 360;
+
+    for(var i = 0; i < len; i++) {
+      var link = links[i];
+      var difference = _getLinkDifference(pov, link);
+      if (difference < nearest_difference) {
+        nearest = link;
+        nearest_difference = difference;
+      }
+    }
+
+    return nearest;
+}
+
+// return the link farthest the current heading
+function _getBackwardLink () {
+    const pov = streetview.getPov();
+    const links = streetview.getLinks();
+    const len = links.length;
+    let farthest = null;
+    let farthest_difference = 0;
+
+    for(var i = 0; i < len; i++) {
+      var link = links[i];
+      var difference = _getLinkDifference(pov, link);
+      if (difference > farthest_difference) {
+        farthest = link;
+        farthest_difference = difference;
+      }
+    }
+
+    return farthest;
 }
