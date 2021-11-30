@@ -8,7 +8,7 @@ let width = window.innerWidth;
 let height = window.innerHeight;
 const screenratio = width / height;
 
-const zoom = 10;
+const zoom = 3;
 
 const hfov = 180 / Math.pow(2, zoom);
 const vfov = hfov * screenratio;
@@ -22,11 +22,13 @@ let masterPov = {
     zoom: zoom
 };
 
+const NAV_SENSITIVITY = 0.00032;
+
 socket.on('transform', function (transform) {
     if (master) {
         const pov = streetview.getPov();
         if(Math.abs(transform) > 8) {
-            pov.heading += transform * 0.0032;
+            pov.heading += transform * NAV_SENSITIVITY;
             streetview.setPov(pov);
         }
     }
