@@ -53,7 +53,7 @@ socket.on('update', function (pov) {
 /* update master pano value */
 socket.on('pano_changed', function (panoid) {
     masterPano = panoid;
-    streetview.setPano(panoid);
+    if (panoid != streetview.getPano()) streetview.setPano(panoid);
 });
 
 /* fly to */
@@ -90,6 +90,9 @@ function initialize() {
 
     /* master listener events */
     if (master) {
+        // emits start position to update the map
+        socket.emit('pano_changed', streetview.getPano());
+
         new google.maps.event.addListener(streetview, 'pov_changed', function () {
             /* emit master pov to all other screens */
             socket.emit('update', streetview.getPov());
