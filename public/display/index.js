@@ -33,6 +33,8 @@ const hfov = fov_table[zoom];
 const vfov = hfov * screenratio;
 const yawshift = yawoffset * hfov;
 
+const panoDiv = document.getElementById('pano');
+
 let streetview = {};
 let masterPano = '';
 let masterPov = {
@@ -98,12 +100,16 @@ function initialize() {
     }
 
     if(master) {
+        // enable links control only for master
         svOptions.linksControl = true;
+    } else {
+        // put trasparent div on top of slaves screen to prevent drag event
+        panoDiv.style.zIndex = -1;
     }
 
     /* initialize street view panorama */
     streetview = new google.maps.StreetViewPanorama(
-        document.getElementById('pano'),
+        panoDiv,
         svOptions
     );
 
@@ -125,8 +131,6 @@ function initialize() {
             }
         });
     }
-
-    update();
 }
 
 /* update pov value for all screens */
