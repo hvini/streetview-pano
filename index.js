@@ -18,6 +18,10 @@ require('dotenv').config();
 // serve static files
 app.use(express.static(__dirname + '/public'));
 
+app.get('/display/:yawoffset', function(req, res) {
+    res.sendFile(__dirname + '/public/display/index.html');
+});
+
 io.on('connection', function (socket) {
     if (SpaceNavigator.deviceCount() > 0) {
         const spacenav = new SpaceNavigator.SpaceNavigator();

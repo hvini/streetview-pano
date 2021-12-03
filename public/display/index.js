@@ -1,18 +1,37 @@
 const socket = io();
 
-const params = (new URL(document.location)).searchParams;
-const master = params.get('master') ? params.get('master') : false;
-const yawoffset = params.get('yawoffset');
+const url = window.location.href;
+const yawoffset = url.split('/').pop() - 1;
+const master = yawoffset == 0 ? true : false;
 
 let width = window.innerWidth;
 let height = window.innerHeight;
 const screenratio = width / height;
 
-const zoom = 3;
+const SV_HFOV_TABLES = {
+    "html4": [
+        180,
+        90,
+        45,
+        22.5,
+        11.25
+    ],
+    "html5": [
+        127,
+        90,
+        53.5,
+        28.125,
+        14.25
+    ]
+}
 
-const hfov = 180 / Math.pow(2, zoom);
+const fov_table = SV_HFOV_TABLES['html5'];
+
+const zoom = 4;
+
+const hfov = fov_table[zoom];
 const vfov = hfov * screenratio;
-const yawshift = master ? 0 * hfov : yawoffset * hfov;
+const yawshift = yawoffset * hfov;
 
 let streetview = {};
 let masterPano = '';
