@@ -1,4 +1,10 @@
+// internal socket
 const socket = io();
+
+// lg socket
+const galaxyMasterIP = 'lg1';
+const galaxyPort = 5433;
+const lgSocket = io(`http://${galaxyMasterIP}:${galaxyPort}`);
 
 const url = window.location.href;
 const yawoffset = url.split('/').pop() - 1;
@@ -44,6 +50,11 @@ let masterPov = {
 };
 
 const NAV_SENSITIVITY = 0.00032;
+
+// listening reset event from lg for screensaver handling
+lgSocket.on('reset', function () {
+    window.location.href = `http://${galaxyMasterIP}:${galaxyPort}/galaxy/basic/screensaver?num=${yawoffset}`;
+});
 
 socket.on('transform', function (transform) {
     if (master) {
